@@ -1,0 +1,39 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#152c32">
+  <meta name="description" content="An offline museum mystery. Collect records, connect the evidence, and prove your accusation.">
+  <title>Casebook — The Last Light</title>
+  <link rel="stylesheet" href="/styles.css">
+  <script type="module" src="/src/app.js"></script>
+</head>
+<body>
+  <a class="skip-link" href="#main">Skip to case</a>
+  <div id="app"></div>
+  <div id="announcement" class="sr-only" role="status" aria-live="polite" aria-atomic="true"></div>
+  <template id="museum-art">
+    <svg viewBox="0 0 600 560" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" focusable="false">
+      <defs><linearGradient id="night" x2="0" y2="1"><stop stop-color="#203c43"/><stop offset="1" stop-color="#0f242b"/></linearGradient><linearGradient id="glass" x2="1" y2="1"><stop stop-color="#89b8b2" stop-opacity=".15"/><stop offset="1" stop-color="#b8d6ce" stop-opacity=".02"/></linearGradient></defs>
+      <rect width="600" height="560" fill="url(#night)"/>
+      <circle cx="438" cy="100" r="37" fill="#e3d8b7"/><circle cx="426" cy="91" r="36" fill="#203c43"/>
+      <path d="M70 370V140Q70 80 130 80T190 140V370M410 370V140Q410 80 470 80T530 140V370" fill="none" stroke="#507477" stroke-width="3"/>
+      <path d="M130 90V360M70 175H190M70 260H190M470 90V360M410 175H530M410 260H530" stroke="#507477" stroke-width="2" opacity=".65"/>
+      <path d="M15 405L300 295 585 405M0 475L300 325 600 475M0 555L300 355 600 555M300 355V560" fill="none" stroke="#426065" opacity=".5"/>
+      <path d="M0 370H600M40 20V370M220 20V370M380 20V370M560 20V370" stroke="#41636a" stroke-width="3" opacity=".5"/>
+      <path d="M235 376L300 350 365 376 300 405Z" fill="#8f866d"/>
+      <path d="M235 376V453L300 485V405Z" fill="#565e57"/><path d="M300 405L365 376V453L300 485Z" fill="#374747"/>
+      <path d="M220 280L300 253 380 280 300 314Z" fill="url(#glass)" stroke="#a9c4bd" stroke-opacity=".55"/>
+      <path d="M220 280V369L300 405 380 369V280M300 314V405" fill="url(#glass)" stroke="#a9c4bd" stroke-opacity=".55"/>
+      <path d="M247 365L300 344 353 365 300 386Z" fill="#14252c"/>
+      <ellipse cx="300" cy="365" rx="20" ry="8" fill="none" stroke="#c4a569" stroke-dasharray="3 4"/>
+      <path d="M252 302L267 296M255 310L279 301" stroke="#d3e5dc" stroke-opacity=".5"/>
+      <path d="M297 65H303L330 250H270Z" fill="#ecd9a7" opacity=".055"/><path d="M286 65H314L306 77H294Z" fill="#d2b77b"/>
+      <path d="M102 111L95 133M160 215L150 243M487 180L478 200M448 299L440 320M118 295L112 309M508 115L501 138" stroke="#92afb0" opacity=".4"/>
+      <rect x="343" y="436" width="39" height="24" rx="2" fill="#d6bd82" transform="rotate(-8 343 436)"/><text x="353" y="450" fill="#21383c" font-family="monospace" font-size="12" transform="rotate(-8 343 436)">01</text>
+      <text x="34" y="520" fill="#9eaaa0" font-family="monospace" font-size="10" letter-spacing="3">BELLWETHER MUSEUM · 21:00</text>
+    </svg>
+  </template>
+</body>
+</html>

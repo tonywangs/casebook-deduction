@@ -1,0 +1,16 @@
+{
+  "name": "casebook-deduction",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "A seeded, offline museum mystery with independently checked evidence.",
+  "scripts": {
+    "start": "node scripts/serve.mjs",
+    "test": "node --test tests/*.test.mjs",
+    "verify:cases": "node scripts/verify-cases.mjs",
+    "test:browser": "playwright test",
+    "check": "npm test && npm run verify:cases && npm run test:browser"
+  },
+  "devDependencies": { "@playwright/test": "1.55.1" },
+  "engines": { "node": ">=22" }
+}

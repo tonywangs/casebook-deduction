@@ -1,0 +1,10 @@
+# Related work
+
+Reviewed on 2026-09-22. These are references for scope and existing approaches, not evidence that Casebook is novel. No implementation or narrative text from these projects was copied.
+
+- Andrew Stockdale, [ClueGen: An Exploration of Procedural Storytelling in the Format of Murder Mystery Games](https://cdn.aaai.org/ojs/12896/12896-52-16413-1-2-20201228.pdf), AIIDE workshop, 2016. The paper describes generated relationships, motives, witness knowledge, and NPC simulation. Casebook deliberately uses a much smaller, static assignment problem with authored atmosphere rather than simulating a crime narrative.
+- Corinna J., [Mysterious Murder](https://github.com/corinnaj/mysterious-murder). Its implementation overview describes a Python prototype and a Rust/WebAssembly version using Ceptre-inspired linear logic and MCTS-driven actors. This is an existing example of generated mystery events presented as a browser puzzle. Casebook generates consistent records directly; it does not model agent goals or action histories.
+- Elliefox AI, [Cold Truth](https://github.com/elliefox-ai/cold-truth). The project README describes generating ground truth before clues, evidence-dependent dialogue, and investigative threads. Casebook uses the same broad, established idea of placing discoverable evidence around a consistent world, with an explicitly enumerated assignment space and an independent test oracle.
+- Simon Tatham, [Solo documentation](https://www.chiark.greenend.org.uk/~sgtatham/puzzles/doc/solo.html). Solo documents reproducible puzzle parameters, pencil marks, and difficulty levels based on solving techniques. This helps frame a critical limit here: Casebook measures uniqueness and minimum clue count, but has not calibrated difficulty against human strategies or players.
+
+Existing procedural mysteries already combine generation, clue collection, and deduction. This project’s contribution is a self-contained implementation and a reproducible correctness audit of its own narrow rules, not a novelty claim or a benchmark against those games.

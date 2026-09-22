@@ -1,0 +1,287 @@
+{
+  "config": {
+    "configFile": "/var/lib/dailybuilder/projects/casebook-deduction/playwright.config.js",
+    "rootDir": "/var/lib/dailybuilder/projects/casebook-deduction/tests/browser",
+    "forbidOnly": false,
+    "fullyParallel": false,
+    "globalSetup": null,
+    "globalTeardown": null,
+    "globalTimeout": 0,
+    "grep": {},
+    "grepInvert": null,
+    "maxFailures": 0,
+    "metadata": {
+      "actualWorkers": 1
+    },
+    "preserveOutput": "always",
+    "reporter": [
+      [
+        "list",
+        null
+      ],
+      [
+        "json",
+        {
+          "outputFile": "results/browser-results.json"
+        }
+      ]
+    ],
+    "reportSlowTests": {
+      "max": 5,
+      "threshold": 300000
+    },
+    "quiet": false,
+    "projects": [
+      {
+        "outputDir": "/var/lib/dailybuilder/projects/casebook-deduction/test-results",
+        "repeatEach": 1,
+        "retries": 0,
+        "metadata": {
+          "actualWorkers": 1
+        },
+        "id": "chromium",
+        "name": "chromium",
+        "testDir": "/var/lib/dailybuilder/projects/casebook-deduction/tests/browser",
+        "testIgnore": [],
+        "testMatch": [
+          "**/*.@(spec|test).?(c|m)[jt]s?(x)"
+        ],
+        "timeout": 45000
+      }
+    ],
+    "shard": null,
+    "updateSnapshots": "missing",
+    "updateSourceMethod": "patch",
+    "version": "1.55.1",
+    "workers": 1,
+    "webServer": {
+      "command": "node scripts/serve.mjs",
+      "url": "http://127.0.0.1:4173",
+      "reuseExistingServer": true,
+      "timeout": 15000
+    }
+  },
+  "suites": [
+    {
+      "title": "game.spec.js",
+      "file": "game.spec.js",
+      "column": 0,
+      "line": 0,
+      "specs": [
+        {
+          "title": "complete offline playthrough: inspections, interviews, notes, hints, wrong accusation, and solution",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 45000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "chromium",
+              "projectName": "chromium",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 12721,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-09-22T04:23:35.824Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "8739d194ba1dcb8a2e3d-deb8210145f3868aae21",
+          "file": "game.spec.js",
+          "line": 57,
+          "column": 1
+        },
+        {
+          "title": "partial hints do not reveal future records; resume, export, import, and restart preserve seeded state",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 45000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "chromium",
+              "projectName": "chromium",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 6713,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-09-22T04:23:48.893Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "8739d194ba1dcb8a2e3d-bcb9af25088bd38933cd",
+          "file": "game.spec.js",
+          "line": 117,
+          "column": 1
+        },
+        {
+          "title": "imports render user text literally and reject malformed saves without losing current progress",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 45000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "chromium",
+              "projectName": "chromium",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 2292,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-09-22T04:23:55.650Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "8739d194ba1dcb8a2e3d-54a2855a666f54282af0",
+          "file": "game.spec.js",
+          "line": 154,
+          "column": 1
+        },
+        {
+          "title": "keyboard-only core flow reaches all records, notebook, hints, and a successful accusation",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 45000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "chromium",
+              "projectName": "chromium",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 22439,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-09-22T04:23:58.009Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "8739d194ba1dcb8a2e3d-81272a83a1f2e0552b9e",
+          "file": "game.spec.js",
+          "line": 209,
+          "column": 1
+        },
+        {
+          "title": "mobile layout stays within viewport and case works when local storage is denied",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 45000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "chromium",
+              "projectName": "chromium",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 2236,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-09-22T04:24:20.499Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "8739d194ba1dcb8a2e3d-fb4036b4a21d2dcb25c4",
+          "file": "game.spec.js",
+          "line": 252,
+          "column": 1
+        },
+        {
+          "title": "corrupt local saves show a recovery path, and static server does not expose source-adjacent files",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 45000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "chromium",
+              "projectName": "chromium",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 1015,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-09-22T04:24:22.767Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "8739d194ba1dcb8a2e3d-271a4461692d86101889",
+          "file": "game.spec.js",
+          "line": 276,
+          "column": 1
+        }
+      ]
+    }
+  ],
+  "errors": [],
+  "stats": {
+    "startTime": "2026-09-22T04:23:32.923Z",
+    "duration": 51096.665,
+    "expected": 6,
+    "skipped": 0,
+    "unexpected": 0,
+    "flaky": 0
+  }
+}
