@@ -1,4 +1,5 @@
-import { test as base, expect } from '@playwright/test';
+import { chromium, firefox, webkit, test as base, expect } from '@playwright/test';
+import { readFile } from 'node:fs/promises';
 import { newSession, collect, serialize, SAVE_KEY } from '../../src/session.js';
 import { possibleThieves, enumerate } from '../oracle.mjs';
 const seed = 'the-last-light';
@@ -147,13 +148,18 @@ test('imports render user text literally and reject malformed saves without losi
 // Move using real Tab events; no locator.focus() or programmatic clicks in this flow.
 async function keyboardActivate(page, id) {
   for (let i = 0; i < 110; i++) {
-    if (await page.evaluate(target => document.activeElement?.id === target, id)) { await page.keyboard.press('Enter'); return; }
+    if (await page.evaluate(target => document.activeElement?.id === target, id)) {
+      const focus = await page.evaluate(() => { const s = getComputedStyle(document.activeElement); return { style: s.outlineStyle, width: parseFloat(s.outlineWidth) }; });
+      expect(focus.style).not.toBe('none'); expect(focus.width).toBeGreaterThanOrEqual(2);
+      await page.keyboard.press('Enter'); return;
+    }
     await page.keyboard.press('Tab');
   }
   throw new Error(`Keyboard could not reach ${id}`);
 }
 
 test('keyboard-only core flow reaches all records, notebook, hints, and a successful accusation', async ({ page }) => {
+  await page.setViewportSize({ width: 390, height: 844 });
   await page.goto('/');
   await keyboardActivate(page, 'start-case');
   for (let i = 0; i < 4; i++) { await keyboardActivate(page, `room-${i}`); await keyboardActivate(page, `inspect-${i}`); }
@@ -204,4 +210,103 @@ test('corrupt local saves show a recovery path, and static server does not expos
   await expect(page.locator('#start-case')).toBeVisible();
   for (const file of ['/package.json', '/.git/config', '/tests/seeds.json', '/results/case-verification.json']) expect((await request.get(file)).status()).toBe(404);
   expect((await request.get('/')).headers()['content-security-policy']).toContain("connect-src 'none'");
+});
+
+
+test('legacy local save migrates on the next edit and keeps the original notebook', async ({ page }) => {
+  const raw = await readFile(new URL('../fixtures/save-v1.json', import.meta.url), 'utf8');
+  await page.addInitScript(({ raw, key }) => { if (!localStorage.getItem(key)) localStorage.setItem(key, raw); }, { raw, key: SAVE_KEY });
+  await page.goto('/'); await page.locator('#resume-case').click();
+  await page.locator('#nav-notebook').click();
+  await expect(page.locator('#notes')).toHaveValue('Legacy notebook');
+  await expect(page.locator('[id="mark-0:room:0"]')).toHaveAccessibleName(/no/);
+  await page.locator('#notes').fill('Migrated notebook');
+  expect(await page.evaluate(key => JSON.parse(localStorage.getItem(key)).version, SAVE_KEY)).toBe(2);
+  await page.reload(); await page.locator('#resume-case').click();
+  await page.locator('#nav-notebook').click();
+  await expect(page.locator('#notes')).toHaveValue('Migrated notebook');
+});
+
+test('read and write failures allow play, announce unsaved imports, and export a usable backup', async ({ page }) => {
+  await page.addInitScript(() => {
+    Storage.prototype.getItem = () => { throw new DOMException('Denied', 'SecurityError'); };
+    Storage.prototype.setItem = () => { throw new DOMException('Full', 'QuotaExceededError'); };
+  });
+  await page.goto('/');
+  await expect(page.getByRole('alert')).toContainText('Local save could not be loaded');
+  const s = newSession(seed); collect(s, 'E01'); s.notes = 'Recover me';
+  await page.locator('#import-save').setInputFiles({ name: 'backup.json', mimeType: 'application/json', buffer: Buffer.from(serialize(s)) });
+  await expect(page.locator('#save-status')).toContainText('Local storage unavailable');
+  await expect(page.locator('#announcement')).toContainText('Local storage unavailable');
+  await page.locator('#inspect-0').click();
+  const downloading = page.waitForEvent('download'); await page.locator('#export-button').click();
+  const raw = await readFile(await (await downloading).path(), 'utf8');
+  expect(JSON.parse(raw).notes).toBe('Recover me');
+  await expect(page.locator('#announcement')).toContainText('Save file exported.');
+});
+
+test('downloaded unfinished and completed saves transfer to fresh profiles of both other engines', async ({ browserName }, testInfo) => {
+  test.setTimeout(180000);
+  const sourceBrowser = await ({ chromium, firefox, webkit })[browserName].launch({ timeout: 15000 });
+  try {
+    const sourceContext = await sourceBrowser.newContext({ serviceWorkers: 'block' });
+    const sourceExternal = [], sourceErrors = [];
+    await sourceContext.route('**/*', route => {
+      if (new URL(route.request().url()).origin === 'http://127.0.0.1:4173') return route.continue();
+      sourceExternal.push(route.request().url()); return route.abort();
+    });
+    const page = await sourceContext.newPage();
+    page.on('pageerror', e => sourceErrors.push(e.message));
+    await page.goto('http://127.0.0.1:4173');
+    await page.locator('#start-case').click(); await collectRooms(page);
+    await page.locator('#nav-notebook').click();
+    await page.locator('#notes').fill('Cross-browser 🕵️ notes');
+    await page.locator('[id="mark-2:badge:3"]').click();
+    await openHints(page); await page.locator('#hint-1').click();
+    const partialDownload = page.waitForEvent('download'); await page.locator('#export-button').click();
+    const partial = await partialDownload;
+    const partialPath = testInfo.outputPath('unfinished.json'); await partial.saveAs(partialPath);
+    await collectInterviews(page);
+    await openHints(page); await page.locator('#hint-2').click();
+    await page.locator('#nav-accusation').click();
+    await page.locator('#accused').selectOption(String((thief + 1) % 4)); await page.locator('#submit-accusation').click();
+    await page.locator('#accused').selectOption(String(thief)); await page.locator('#submit-accusation').click();
+    const completeDownload = page.waitForEvent('download'); await page.locator('#export-button').click();
+    const complete = await completeDownload;
+    const completePath = testInfo.outputPath('completed.json'); await complete.saveAs(completePath);
+    expect(sourceExternal).toEqual([]); expect(sourceErrors).toEqual([]);
+    await sourceBrowser.close(); // Transfer after the source exits, as on separate devices.
+    for (const [name, type] of Object.entries({ chromium, firefox, webkit })) {
+      if (name === browserName) continue;
+      const browser = await type.launch({ timeout: 15000 });
+      try {
+        for (const [path, closed] of [[partialPath, false], [completePath, true]]) {
+          const context = await browser.newContext({ serviceWorkers: 'block', viewport: { width: 390, height: 844 } });
+          const external = [], errors = [];
+          await context.route('**/*', route => {
+            if (new URL(route.request().url()).origin === 'http://127.0.0.1:4173') return route.continue();
+            external.push(route.request().url()); return route.abort();
+          });
+          const target = await context.newPage(); target.on('pageerror', e => errors.push(e.message));
+          await target.goto('http://127.0.0.1:4173');
+          await expect(target.locator('#resume-case')).toHaveCount(0);
+          const chooser = target.waitForEvent('filechooser');
+          await target.locator('#import-button').click(); await (await chooser).setFiles(path);
+          await expect(target.locator('.case-meta')).toContainText(closed ? '8 / 8' : '4 / 8');
+          await expect(target.locator('#announcement')).toContainText('Save imported and checked');
+          if (closed) await expect(target.getByRole('heading', { name: 'Case closed', exact: true })).toBeVisible();
+          await target.locator('#nav-notebook').click();
+          await expect(target.locator('#notes')).toHaveValue('Cross-browser 🕵️ notes');
+          await expect(target.locator('[id="mark-2:badge:3"]')).toHaveAccessibleName(/yes/);
+          await expect(target.locator('.hint-result')).toBeVisible();
+          expect(await target.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBeTruthy();
+          expect(await target.evaluate(key => JSON.parse(localStorage.getItem(key)), SAVE_KEY)).toEqual(JSON.parse(await readFile(path, 'utf8')));
+          await target.reload(); await target.locator('#resume-case').click();
+          await expect(target.locator('.hint-result')).toBeVisible();
+          expect(external).toEqual([]); expect(errors).toEqual([]);
+          await context.close();
+        }
+      } finally { await browser.close(); }
+    }
+  } finally { await sourceBrowser.close(); }
 });

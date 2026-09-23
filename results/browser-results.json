@@ -47,6 +47,38 @@
           "**/*.@(spec|test).?(c|m)[jt]s?(x)"
         ],
         "timeout": 45000
+      },
+      {
+        "outputDir": "/var/lib/dailybuilder/projects/casebook-deduction/test-results",
+        "repeatEach": 1,
+        "retries": 0,
+        "metadata": {
+          "actualWorkers": 1
+        },
+        "id": "firefox",
+        "name": "firefox",
+        "testDir": "/var/lib/dailybuilder/projects/casebook-deduction/tests/browser",
+        "testIgnore": [],
+        "testMatch": [
+          "**/*.@(spec|test).?(c|m)[jt]s?(x)"
+        ],
+        "timeout": 45000
+      },
+      {
+        "outputDir": "/var/lib/dailybuilder/projects/casebook-deduction/test-results",
+        "repeatEach": 1,
+        "retries": 0,
+        "metadata": {
+          "actualWorkers": 1
+        },
+        "id": "webkit",
+        "name": "webkit",
+        "testDir": "/var/lib/dailybuilder/projects/casebook-deduction/tests/browser",
+        "testIgnore": [],
+        "testMatch": [
+          "**/*.@(spec|test).?(c|m)[jt]s?(x)"
+        ],
+        "timeout": 45000
       }
     ],
     "shard": null,
@@ -84,12 +116,12 @@
                   "workerIndex": 0,
                   "parallelIndex": 0,
                   "status": "passed",
-                  "duration": 12721,
+                  "duration": 12965,
                   "errors": [],
                   "stdout": [],
                   "stderr": [],
                   "retry": 0,
-                  "startTime": "2026-09-22T04:23:35.824Z",
+                  "startTime": "2026-09-23T06:12:15.247Z",
                   "annotations": [],
                   "attachments": []
                 }
@@ -99,7 +131,7 @@
           ],
           "id": "8739d194ba1dcb8a2e3d-deb8210145f3868aae21",
           "file": "game.spec.js",
-          "line": 57,
+          "line": 58,
           "column": 1
         },
         {
@@ -118,12 +150,12 @@
                   "workerIndex": 0,
                   "parallelIndex": 0,
                   "status": "passed",
-                  "duration": 6713,
+                  "duration": 6784,
                   "errors": [],
                   "stdout": [],
                   "stderr": [],
                   "retry": 0,
-                  "startTime": "2026-09-22T04:23:48.893Z",
+                  "startTime": "2026-09-23T06:12:28.470Z",
                   "annotations": [],
                   "attachments": []
                 }
@@ -133,7 +165,7 @@
           ],
           "id": "8739d194ba1dcb8a2e3d-bcb9af25088bd38933cd",
           "file": "game.spec.js",
-          "line": 117,
+          "line": 118,
           "column": 1
         },
         {
@@ -152,12 +184,12 @@
                   "workerIndex": 0,
                   "parallelIndex": 0,
                   "status": "passed",
-                  "duration": 2292,
+                  "duration": 2721,
                   "errors": [],
                   "stdout": [],
                   "stderr": [],
                   "retry": 0,
-                  "startTime": "2026-09-22T04:23:55.650Z",
+                  "startTime": "2026-09-23T06:12:35.332Z",
                   "annotations": [],
                   "attachments": []
                 }
@@ -167,7 +199,7 @@
           ],
           "id": "8739d194ba1dcb8a2e3d-54a2855a666f54282af0",
           "file": "game.spec.js",
-          "line": 154,
+          "line": 155,
           "column": 1
         },
         {
@@ -186,12 +218,12 @@
                   "workerIndex": 0,
                   "parallelIndex": 0,
                   "status": "passed",
-                  "duration": 22439,
+                  "duration": 15236,
                   "errors": [],
                   "stdout": [],
                   "stderr": [],
                   "retry": 0,
-                  "startTime": "2026-09-22T04:23:58.009Z",
+                  "startTime": "2026-09-23T06:12:38.081Z",
                   "annotations": [],
                   "attachments": []
                 }
@@ -201,7 +233,7 @@
           ],
           "id": "8739d194ba1dcb8a2e3d-81272a83a1f2e0552b9e",
           "file": "game.spec.js",
-          "line": 209,
+          "line": 219,
           "column": 1
         },
         {
@@ -220,12 +252,12 @@
                   "workerIndex": 0,
                   "parallelIndex": 0,
                   "status": "passed",
-                  "duration": 2236,
+                  "duration": 2227,
                   "errors": [],
                   "stdout": [],
                   "stderr": [],
                   "retry": 0,
-                  "startTime": "2026-09-22T04:24:20.499Z",
+                  "startTime": "2026-09-23T06:12:53.422Z",
                   "annotations": [],
                   "attachments": []
                 }
@@ -235,7 +267,7 @@
           ],
           "id": "8739d194ba1dcb8a2e3d-fb4036b4a21d2dcb25c4",
           "file": "game.spec.js",
-          "line": 252,
+          "line": 266,
           "column": 1
         },
         {
@@ -254,12 +286,12 @@
                   "workerIndex": 0,
                   "parallelIndex": 0,
                   "status": "passed",
-                  "duration": 1015,
+                  "duration": 1094,
                   "errors": [],
                   "stdout": [],
                   "stderr": [],
                   "retry": 0,
-                  "startTime": "2026-09-22T04:24:22.767Z",
+                  "startTime": "2026-09-23T06:12:55.727Z",
                   "annotations": [],
                   "attachments": []
                 }
@@ -269,7 +301,75 @@
           ],
           "id": "8739d194ba1dcb8a2e3d-271a4461692d86101889",
           "file": "game.spec.js",
-          "line": 276,
+          "line": 290,
+          "column": 1
+        },
+        {
+          "title": "legacy local save migrates on the next edit and keeps the original notebook",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 45000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "chromium",
+              "projectName": "chromium",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 4056,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-09-23T06:12:56.847Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "8739d194ba1dcb8a2e3d-c280e2691c3666fb176e",
+          "file": "game.spec.js",
+          "line": 301,
+          "column": 1
+        },
+        {
+          "title": "read and write failures allow play, announce unsaved imports, and export a usable backup",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 45000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "chromium",
+              "projectName": "chromium",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 3011,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-09-23T06:13:00.927Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "8739d194ba1dcb8a2e3d-88b8f4dbb61e1bd6baaf",
+          "file": "game.spec.js",
+          "line": 326,
           "column": 1
         }
       ]
@@ -277,9 +377,9 @@
   ],
   "errors": [],
   "stats": {
-    "startTime": "2026-09-22T04:23:32.923Z",
-    "duration": 51096.665,
-    "expected": 6,
+    "startTime": "2026-09-23T06:12:12.119Z",
+    "duration": 52116.397,
+    "expected": 8,
     "skipped": 0,
     "unexpected": 0,
     "flaky": 0

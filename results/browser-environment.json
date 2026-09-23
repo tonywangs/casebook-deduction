@@ -1,0 +1,23 @@
+{
+  "node": "v24.20.0",
+  "platform": "linux",
+  "results": [
+    {
+      "name": "chromium",
+      "passed": true,
+      "version": "140.0.7339.186"
+    },
+    {
+      "name": "firefox",
+      "passed": true,
+      "version": "141.0"
+    },
+    {
+      "name": "webkit",
+      "passed": false,
+      "version": "26.0",
+      "stage": "page",
+      "error": "Page probe exceeded 15 seconds"
+    }
+  ]
+}

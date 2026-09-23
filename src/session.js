@@ -1,10 +1,11 @@
 import { generateCase, GENERATOR_VERSION } from './generator.js';
 import { solve, culprits, minimalSupport, describeClause } from './logic.js';
-export const SAVE_VERSION = 1;
+export const SAVE_VERSION = 2;
+// Keep the original storage slot so upgrading discovers existing v1 progress.
 export const SAVE_KEY = 'casebook.save.v1';
 export const MAX_SAVE_BYTES = 65536;
 export function newSession(seed) {
-  return { game: generateCase(seed), collected: [], conversations: [], marks: {}, notes: '', attempts: [], completed: false };
+  return { game: generateCase(seed), collected: [], conversations: [], marks: {}, notes: '', attempts: [], hints: [], completed: false };
 }
 export const collectedEvidence = session => session.game.evidence.filter(e => session.collected.includes(e.id));
 export const collectedClauses = session => collectedEvidence(session).map(e => e.clause);
@@ -66,6 +67,17 @@ export function hint(session, level = 0) {
   }
   return { title: 'Keep the possibilities open', text: evidence.length ? 'The collected records do not yet fix a room or badge for a person, or exclude a suspect. Use “A place to look” to find another record.' : 'You have no evidence yet. Visit a room and inspect its record before asking for a deduction.', evidence: [] };
 }
+export function requestHint(session, level) {
+  if (![0, 1, 2].includes(level)) throw new Error('Choose a hint level from 0 to 2.');
+  const result = hint(session, level);
+  session.hints.push({ level, evidence: [...session.collected] });
+  session.hints = session.hints.slice(-30);
+  return result;
+}
+export function restoreHint(session) {
+  const last = session.hints.at(-1);
+  return last ? hint({ ...session, collected: last.evidence }, last.level) : null;
+}
 export function evaluateAccusation(session, suspect) {
   if (!Number.isInteger(suspect) || suspect < 0 || suspect > 3) throw new Error('Choose one of the four suspects.');
   const possible = culprits(solve(collectedClauses(session)));
@@ -89,7 +101,7 @@ export function accuse(session, suspect) {
 export function serialize(session) {
   return JSON.stringify({ format: 'casebook', version: SAVE_VERSION, generator: GENERATOR_VERSION,
     seed: session.game.seed, collected: session.collected, conversations: session.conversations,
-    marks: session.marks, notes: session.notes, attempts: session.attempts });
+    marks: session.marks, notes: session.notes, attempts: session.attempts, hints: session.hints });
 }
 const plainObject = x => x !== null && typeof x === 'object' && !Array.isArray(x) && Object.getPrototypeOf(x) === Object.prototype;
 function uniqueList(value, allowed, max) {
@@ -104,24 +116,37 @@ export function deserialize(text) {
   if (typeof text !== 'string' || new TextEncoder().encode(text).length > MAX_SAVE_BYTES) throw new Error('Save file is too large (maximum 64 KiB).');
   let data;
   try { data = JSON.parse(text); } catch { throw new Error('This file is not valid JSON. Your current case has not changed.'); }
-  const keys = ['format', 'version', 'generator', 'seed', 'collected', 'conversations', 'marks', 'notes', 'attempts'];
+  if (plainObject(data) && ![1, SAVE_VERSION].includes(data.version)) throw new Error('Unsupported save version. Use the Casebook version that exported this file.');
+  if (plainObject(data) && data.generator !== GENERATOR_VERSION) throw new Error('Unsupported generator version. Use a compatible Casebook release.');
+  const keys = ['format', 'version', 'generator', 'seed', 'collected', 'conversations', 'marks', 'notes', 'attempts', ...(data?.version === 1 ? [] : ['hints'])];
   if (!plainObject(data) || Object.keys(data).some(k => !keys.includes(k)) || keys.some(k => !Object.hasOwn(data, k))
-    || data.format !== 'casebook' || data.version !== SAVE_VERSION || data.generator !== GENERATOR_VERSION) throw new Error('Unsupported or malformed Casebook save.');
+    || data.format !== 'casebook' || ![1, SAVE_VERSION].includes(data.version) || data.generator !== GENERATOR_VERSION) throw new Error('Unsupported or malformed Casebook save. Export a fresh backup from the original browser.');
+  if (data.version === 1) data = { ...data, hints: [] }; // v1 never recorded hint requests.
   const session = newSession(data.seed);
   if (!validCollection(session.game, data.collected) || !uniqueList(data.conversations, [0, 1, 2, 3], 4)
     || !plainObject(data.marks) || Object.keys(data.marks).length > 32 || typeof data.notes !== 'string' || data.notes.length > 2000
-    || !Array.isArray(data.attempts) || data.attempts.length > 30) throw new Error('Invalid progress in save file.');
+    || !Array.isArray(data.attempts) || data.attempts.length > 30
+    || !Array.isArray(data.hints) || data.hints.length > 30) throw new Error('Invalid progress in save file. Export a fresh backup from the original browser.');
   for (const [key, value] of Object.entries(data.marks)) markClause(key, value);
   session.collected = [...data.collected]; session.conversations = [...data.conversations];
   session.marks = { ...data.marks }; session.notes = data.notes;
   let priorEvidence = [];
   for (const attempt of data.attempts) {
     if (!plainObject(attempt) || Object.keys(attempt).sort().join(',') !== 'evidence,suspect' || !validCollection(session.game, attempt.evidence)
-      || !attempt.evidence.every(id => data.collected.includes(id)) || !priorEvidence.every(id => attempt.evidence.includes(id))) throw new Error('Invalid accusation history.');
+      || !attempt.evidence.every(id => data.collected.includes(id)) || !priorEvidence.every(id => attempt.evidence.includes(id))) throw new Error('Invalid accusation history. Export a fresh backup from the original browser.');
     const result = evaluateAccusation({ ...session, collected: attempt.evidence }, attempt.suspect);
     session.completed ||= result.outcome === 'correct';
     session.attempts.push({ suspect: attempt.suspect, evidence: [...attempt.evidence] });
     priorEvidence = attempt.evidence;
+  }
+  let previousHintEvidence = [];
+  for (const entry of data.hints) {
+    if (!plainObject(entry) || Object.keys(entry).sort().join(',') !== 'evidence,level'
+      || ![0, 1, 2].includes(entry.level) || !validCollection(session.game, entry.evidence)
+      || !entry.evidence.every(id => data.collected.includes(id))
+      || !previousHintEvidence.every(id => entry.evidence.includes(id))) throw new Error('Invalid hint history. Export a fresh backup from the original browser.');
+    session.hints.push({ level: entry.level, evidence: [...entry.evidence] });
+    previousHintEvidence = entry.evidence;
   }
   return session;
 }

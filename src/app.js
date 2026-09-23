@@ -1,10 +1,10 @@
 import { DEFAULT_SEED } from './generator.js';
-import { newSession, collect, available, collectedEvidence, checkNotebook, hint, accuse, serialize, deserialize, SAVE_KEY, MAX_SAVE_BYTES, evaluateAccusation } from './session.js';
+import { newSession, collect, available, collectedEvidence, checkNotebook, requestHint, restoreHint, accuse, serialize, deserialize, SAVE_KEY, MAX_SAVE_BYTES, evaluateAccusation } from './session.js';
 const root = document.querySelector('#app');
 const live = document.querySelector('#announcement');
 let session = null, saved = null, view = 'desk', hintResult = null, accusationResult = null, notebookResult = null;
-let notice = '', saveStatus = 'Saved on this device', activeRoom = 0, activePerson = 0, reveal = null;
-try { const raw = localStorage.getItem(SAVE_KEY); if (raw) saved = deserialize(raw); }
+let notice = '', saveStatus = 'Not yet saved on this device', activeRoom = 0, activePerson = 0, reveal = null;
+try { const raw = localStorage.getItem(SAVE_KEY); if (raw) { saved = deserialize(raw); saveStatus = 'Loaded from this device'; } }
 catch (error) { notice = `Local save could not be loaded: ${error.message} You may import a backup or start a new case.`; }
 function el(tag, attrs = {}, ...children) {
   const node = document.createElement(tag);
@@ -19,10 +19,17 @@ function el(tag, attrs = {}, ...children) {
 const button = (text, onclick, attrs = {}) => el('button', { type: 'button', onclick, ...attrs }, text);
 const eyebrow = text => el('p', { class: 'eyebrow' }, text);
 const paragraph = (text, cls = '') => el('p', { class: cls }, text);
-function announce(text) { live.textContent = ''; requestAnimationFrame(() => { live.textContent = text; }); }
+let announcementFrame;
+function announce(text) {
+  if (session && saveStatus.startsWith('Local storage unavailable') && !text.includes(saveStatus)) text += ` ${saveStatus}.`;
+  cancelAnimationFrame(announcementFrame);
+  live.textContent = '';
+  announcementFrame = requestAnimationFrame(() => { live.textContent = text; });
+}
 function persist() {
   try { localStorage.setItem(SAVE_KEY, serialize(session)); saved = session; saveStatus = 'Saved on this device'; }
   catch { saveStatus = 'Local storage unavailable — export a backup'; }
+  announce(saveStatus);
   document.querySelector('#save-status')?.replaceChildren(saveStatus);
 }
 function go(next) { view = next; reveal = null; render(true); }
@@ -74,7 +81,7 @@ function desk() {
     el('section', { class: 'desk-intro' }, eyebrow('YOUR INVESTIGATION'), el('h2', {}, 'Look closely. Think slowly.'),
       el('div', { class: 'steps' }, ...[['01', 'Find the records', 'Explore four rooms, then bring what you find to the four suspects. Every path is available without guessing the culprit.'], ['02', 'Connect the facts', 'Keep room and badge deductions in your notebook. Ask for a nudge when you need one. The records are reliable; hunches are yours.'], ['03', 'Make your case', 'Name the person in the gallery at 21:00. An accusation needs evidence, and a mistaken theory never ends your investigation.']].map(([num, heading, body]) => el('article', {}, eyebrow(num), el('h3', {}, heading), paragraph(body))))));
 }
-function resetViews() { hintResult = null; accusationResult = null; notebookResult = null; reveal = null; activeRoom = 0; activePerson = 0; notice = ''; }
+function resetViews() { hintResult = restoreHint(session); accusationResult = null; notebookResult = null; reveal = null; activeRoom = 0; activePerson = 0; notice = ''; }
 function caseView() {
   const pages = { explore, interviews, evidenceFile, notebook, accusation };
   const content = view === 'evidence' ? pages.evidenceFile() : (pages[view] || explore)();
@@ -91,7 +98,7 @@ function briefing() {
     paragraph('Your task is to identify the thief. You do not need to determine every other room and badge. No timers, penalties, or hidden actions.'));
 }
 function collectRecord(id) {
-  try { const record = collect(session, id); reveal = record; hintResult = null; notebookResult = null; persist(); render(); announce(`Collected ${record.id}. ${record.text}`); }
+  try { const record = collect(session, id); reveal = record; notebookResult = null; persist(); render(); announce(`Collected ${record.id}. ${record.text}`); }
   catch (error) { notice = error.message; render(); }
 }
 function recordCard(record, compact = false) {
@@ -179,11 +186,11 @@ function accusation() {
 }
 function hintPanel() {
   return el('details', { class: 'hint-panel', open: Boolean(hintResult) }, el('summary', {}, 'Need a nudge?'), paragraph('Choose how much help you want. Deductions cite only the evidence in your file.', 'fine-print'),
-    el('div', { class: 'button-row' }, ...['A place to look', 'Show a deduction', 'Explain the conclusion'].map((text, level) => button(text, () => { hintResult = hint(session, level); render(); announce(`${hintResult.title}. ${hintResult.text}`); }, { class: 'secondary', id: `hint-${level}` }))),
-    hintResult && el('div', { class: 'hint-result', role: 'status' }, el('h3', {}, hintResult.title), paragraph(hintResult.text), citations(hintResult.evidence)));
+    el('div', { class: 'button-row' }, ...['A place to look', 'Show a deduction', 'Explain the conclusion'].map((text, level) => button(text, () => { hintResult = requestHint(session, level); persist(); render(); announce(`${hintResult.title}. ${hintResult.text}`); }, { class: 'secondary', id: `hint-${level}` }))),
+    hintResult && el('div', { class: 'hint-result', role: 'status' }, el('h3', {}, hintResult.title), paragraph(`Requested with ${session.hints.at(-1).evidence.length} / 8 records collected.`, 'fine-print'), paragraph(hintResult.text), citations(hintResult.evidence)));
 }
 function footer() {
-  return el('footer', { class: 'footer' }, el('span', { id: 'save-status' }, session ? saveStatus : 'A local, self-contained mystery'),
+  return el('footer', { class: 'footer' }, el('span', { id: 'save-status', role: 'status', 'aria-live': 'polite' }, session ? saveStatus : 'A local, self-contained mystery'),
     session && view !== 'desk' ? button('Restart this seed', () => {
       if (!window.confirm('Restart this seed and clear its collected evidence and notebook?')) return;
       session = newSession(session.game.seed); resetViews(); persist(); go('explore'); announce('Case restarted with the same seed.');
@@ -197,12 +204,12 @@ function exportSave() {
   announce('Save file exported.');
 }
 async function importSave(event) {
-  const file = event.target.files[0]; if (!file) return;
+  const file = event.target.files[0]; event.target.value = ''; if (!file) return;
   try {
     if (file.size > MAX_SAVE_BYTES) throw new Error('Save file is too large (maximum 64 KiB).');
     const imported = deserialize(await file.text());
     if ((session || saved) && !window.confirm('Replace the current local case with this imported save?')) return;
-    session = imported; resetViews(); persist(); go(session.completed ? 'accusation' : 'explore'); announce('Save imported and checked.');
+    session = imported; resetViews(); persist(); go(session.completed ? 'accusation' : 'explore'); announce(`Save imported and checked. ${saveStatus}.`);
   } catch (error) { notice = `Import failed: ${error.message} Your current case has not changed.`; render(); announce(notice); }
 }
 render();

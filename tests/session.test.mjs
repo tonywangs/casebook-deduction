@@ -116,7 +116,7 @@ test('malformed, oversized, foreign-version, forged-completion, and unreachable 
   const base = JSON.parse(serialize(fresh()));
   for (const text of ['', '{', 'null', '[]', '1', '"text"', 'x'.repeat(MAX_SAVE_BYTES + 1)]) assert.throws(() => deserialize(text));
   for (const mutate of [
-    d => { d.version = 2; }, d => { d.generator = 999; }, d => { d.format = 'other'; },
+    d => { d.version = 99; }, d => { d.generator = 999; }, d => { d.format = 'other'; },
     d => { d.completed = true; }, d => { delete d.notes; }, d => { d.seed = []; },
     d => { d.collected = ['E05']; }, d => { d.collected = ['E01', 'E01']; }, d => { d.collected = ['E99']; },
     d => { d.collected = ['E05', 'E01']; }, d => { d.marks = []; }, d => { d.marks['0:room:0'] = 'maybe'; },

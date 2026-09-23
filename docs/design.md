@@ -79,18 +79,21 @@ Marks are a map from `person:room:value` or `person:badge:value` to `yes` or `no
 ```json
 {
   "format": "casebook",
-  "version": 1,
+  "version": 2,
   "generator": 1,
   "seed": "the-last-light",
   "collected": ["E01"],
   "conversations": [0],
   "marks": {"2:badge:3": "yes"},
   "notes": "Check the badge connection.",
-  "attempts": [{"suspect": 0, "evidence": ["E01"]}]
+  "attempts": [{"suspect": 0, "evidence": ["E01"]}],
+  "hints": [{"level": 1, "evidence": ["E01"]}]
 }
 ```
 
-The importer enforces a 64 KiB byte limit before parsing, exact top-level fields/version, valid seed, unique collected IDs in reachable acquisition order, bounded conversation IDs, legal notebook keys/values, 2,000-character notes, and at most 30 accusation snapshots. Each snapshot must contain a reachable subset of the collected records; evidence cannot disappear between retained attempts. Outcomes and completion are recomputed from those snapshots. Saves do not supply case prose, executable code, clue predicates, HTML, or trusted completion flags.
+The importer enforces a 64 KiB byte limit before parsing, exact top-level fields/version, valid seed, unique collected IDs in reachable acquisition order, bounded conversation IDs, legal notebook keys/values, 2,000-character notes, and at most 30 accusation snapshots and 30 hint snapshots. Hint levels are integers 0–2; hint prose and citations are regenerated from their evidence snapshot. Each snapshot must contain a reachable subset of the collected records; evidence cannot disappear between retained attempts. Hint evidence also cannot disappear between retained requests. Outcomes and completion are recomputed from those snapshots. Saves do not supply case prose, executable code, clue predicates, HTML, or trusted completion flags.
+
+Format 1 has exactly the same fields except `hints`. It is validated and migrated in memory with an empty hint history; the original release never saved hint requests. The next successful write or export emits format 2. The storage key deliberately remains `casebook.save.v1` so existing progress is discovered. Reads alone do not overwrite local data. Unsupported save or generator versions produce recovery guidance.
 
 Notebook contradictions are legitimate player data, so saves preserve them. Untrusted seed and note text is inserted through text nodes and textarea content, never `innerHTML`. Loading validates everything in a temporary session before replacing live progress. Storage failure does not prevent play or file export.
 

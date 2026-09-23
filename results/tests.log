@@ -2,20 +2,23 @@
 > casebook-deduction@1.0.0 test
 > node --test tests/*.test.mjs
 
-✔ production and independent models agree on every atomic clause in every world (284.309683ms)
-✔ seed normalization, boundaries, Unicode, and complete deterministic regeneration (11883.896427ms)
-✔ contradictory clauses have no worlds; changing a crucial clue can change the answer (1.189368ms)
-✔ record collection respects prerequisites and is idempotent (3.335418ms)
-✔ notebook conflicts use collected evidence, preserve contradictions, and never assert proof from compatibility (1694.897365ms)
-✔ no guessing win, wrong accusations explain collected proof, and correct case resumes closed (1805.356116ms)
-✔ hints and accusations are sound for every evidence subset across four seeded cases (17906.827303ms)
-✔ save roundtrip and deterministic replay preserve progress without trusting imported outcomes (1284.771466ms)
-✔ malformed, oversized, foreign-version, forged-completion, and unreachable saves are rejected (18207.220694ms)
-ℹ tests 9
+✔ production and independent models agree on every atomic clause in every world (676.454622ms)
+✔ seed normalization, boundaries, Unicode, and complete deterministic regeneration (16012.170384ms)
+✔ contradictory clauses have no worlds; changing a crucial clue can change the answer (1.961953ms)
+✔ portable saves preserve 256 seeds at empty, partial, investigated and closed stages (797022.138208ms)
+✔ v1 fixture migrates without changing progress or case facts (663.630465ms)
+✔ hint snapshots are bounded, validated, and reconstructed rather than imported as prose (3039.422878ms)
+✔ record collection respects prerequisites and is idempotent (3.87637ms)
+✔ notebook conflicts use collected evidence, preserve contradictions, and never assert proof from compatibility (553.953124ms)
+✔ no guessing win, wrong accusations explain collected proof, and correct case resumes closed (547.83303ms)
+✔ hints and accusations are sound for every evidence subset across four seeded cases (5675.638258ms)
+✔ save roundtrip and deterministic replay preserve progress without trusting imported outcomes (416.673462ms)
+✔ malformed, oversized, foreign-version, forged-completion, and unreachable saves are rejected (5319.39839ms)
+ℹ tests 12
 ℹ suites 0
-ℹ pass 9
+ℹ pass 12
 ℹ fail 0
 ℹ cancelled 0
 ℹ skipped 0
 ℹ todo 0
-ℹ duration_ms 55297.141665
+ℹ duration_ms 832212.63209
